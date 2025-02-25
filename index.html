@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Dashboard</title>
+  
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    .container {
+      display: flex;
+    }
+    .list-group {
+      width: 200px;
+    }
+    .chart-container {
+      flex: 1;
+      margin-left: 20px;
+    }
+  </style>  
+</head>
+<body>
+  <div class="container">
+   
+    <div class="list-group">
+      {% for company in companies %}
+        <a href="#" class="list-group-item list-group-item-action" onclick="loadChartData('{{ company }}')">{{ company }}</a>
+      {% endfor %}
+    </div>
+
+    
+    <div class="chart-container">
+      <canvas id="stockChart"></canvas>
+    </div>
+  </div>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+    var stockChart;
+
+    
+    function initChart() {
+      var ctx = document.getElementById('stockChart').getContext('2d');
+      stockChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Open', 'High', 'Low', 'Close'],
+          datasets: [{
+            label: 'Stock Data',
+            data: [0, 0, 0, 0],  
+            backgroundColor: ['#FF5733', '#FFBD33', '#33FF57', '#33A8FF'],
+            borderColor: ['#FF5733', '#FFBD33', '#33FF57', '#33A8FF'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    
+    function loadChartData(company) {
+      $.ajax({
+        url: `/get_chart_data/${company}`,
+        method: 'GET',
+        success: function(data) {
+          
+          stockChart.data.datasets[0].data = data.values;
+          stockChart.update();
+        }
+      });
+    }
+
+    
+    $(document).ready(function() {
+      initChart();
+    });
+  </script>
+
+  
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
